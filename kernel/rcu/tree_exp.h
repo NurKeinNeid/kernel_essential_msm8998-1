@@ -351,7 +351,7 @@ retry_ipi:
 				mask_ofl_ipi &= ~mask;	
 			} else {	
 				/* Failed, raced with CPU hotplug operation. */
-				raw_spin_lock_irqsave(&rnp->lock, flags);	
+		 		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 				if ((rnp->qsmaskinitnext & mask) &&
 				    (rnp->expmask & mask)) {	
 					/* Online, so delay for a bit and try again. */
