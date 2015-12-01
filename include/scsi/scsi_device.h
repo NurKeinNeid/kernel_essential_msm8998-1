@@ -427,6 +427,7 @@ extern void sdev_enable_disk_events(struct scsi_device *sdev);
 extern void scsi_set_cmd_timeout_override(struct scsi_device *sdev,
 					  unsigned int timeout);
 extern int scsi_vpd_lun_id(struct scsi_device *, char *, size_t);
+extern int scsi_vpd_tpg_id(struct scsi_device *, int *);
 
 #ifdef CONFIG_PM
 extern int scsi_autopm_get_device(struct scsi_device *);
