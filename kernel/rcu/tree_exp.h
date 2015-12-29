@@ -66,13 +66,13 @@ static void sync_exp_reset_tree_hotplug(struct rcu_state *rsp)
 	rcu_for_each_leaf_node(rsp, rnp) {	
  		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		if (rnp->expmaskinit == rnp->expmaskinitnext) {	
-			raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
 			continue;  /* No new CPUs, nothing to do. */	
 		}	
  		/* Update this node's mask, track old value for propagation. */	
 		oldmask = rnp->expmaskinit;	
 		rnp->expmaskinit = rnp->expmaskinitnext;	
-		raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
  		/* If was already nonzero, nothing to propagate. */	
 		if (oldmask)	
 			continue;	
@@ -85,7 +85,7 @@ static void sync_exp_reset_tree_hotplug(struct rcu_state *rsp)
 			if (rnp_up->expmaskinit)	
 				done = true;	
 			rnp_up->expmaskinit |= mask;	
-			raw_spin_unlock_irqrestore(&rnp_up->lock, flags);	
+ 			raw_spin_unlock_irqrestore_rcu_node(rnp_up, flags);
 			if (done)	
 				break;	
 			mask = rnp_up->grpmask;	
@@ -106,7 +106,7 @@ static void __maybe_unused sync_exp_reset_tree(struct rcu_state *rsp)
  		raw_spin_lock_irqsave_rcu_node(rnp, flags);
 		WARN_ON_ONCE(rnp->expmask);	
 		rnp->expmask = rnp->expmaskinit;	
-		raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
 	}	
 }	
  /*	
@@ -144,11 +144,11 @@ static void __rcu_report_exp_rnp(struct rcu_state *rsp, struct rcu_node *rnp,
 			if (!rnp->expmask)	
 				rcu_initiate_boost(rnp, flags);	
 			else	
-				raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+				raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
 			break;	
 		}	
 		if (rnp->parent == NULL) {	
-			raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
 			if (wake) {	
 				smp_mb(); /* EGP done before wake_up(). */	
 				wake_up(&rsp->expedited_wq);	
@@ -156,7 +156,7 @@ static void __rcu_report_exp_rnp(struct rcu_state *rsp, struct rcu_node *rnp,
 			break;	
 		}	
 		mask = rnp->grpmask;	
-		raw_spin_unlock(&rnp->lock); /* irqs remain disabled */	
+ 		raw_spin_unlock_rcu_node(rnp); /* irqs remain disabled. */
 		rnp = rnp->parent;	
 		raw_spin_lock_rcu_node(rnp); /* irqs already disabled. */
 		WARN_ON_ONCE(!(rnp->expmask & mask));	
@@ -187,7 +187,7 @@ static void rcu_report_exp_cpu_mult(struct rcu_state *rsp, struct rcu_node *rnp,
 	unsigned long flags;	
  	raw_spin_lock_irqsave_rcu_node(rnp, flags);
 	if (!(rnp->expmask & mask)) {	
-		raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
 		return;	
 	}	
 	rnp->expmask &= ~mask;	
@@ -339,7 +339,7 @@ static void sync_rcu_exp_select_cpus(struct rcu_state *rsp,
 		 */	
 		if (rcu_preempt_has_tasks(rnp))	
 			rnp->exp_tasks = rnp->blkd_tasks.next;	
-		raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
  		/* IPI the remaining CPUs for expedited quiescent state. */	
 		for_each_leaf_node_possible_cpu(rnp, cpu) {
 			unsigned long mask = leaf_node_cpu_bit(rnp, cpu);
@@ -355,7 +355,7 @@ retry_ipi:
  			raw_spin_lock_irqsave_rcu_node(rnp, flags);
  			if (cpu_online(cpu) &&
  			    (rnp->expmask & mask)) {
-				raw_spin_unlock_irqrestore(&rnp->lock, flags);	
+				raw_spin_unlock_irqrestore_rcu_node(rnp, flags);	
  				schedule_timeout_uninterruptible(1);
  				if (cpu_online(cpu) &&
  				    (rnp->expmask & mask))
@@ -364,7 +364,7 @@ retry_ipi:
 			}
 	 			if (!(rnp->expmask & mask))
  				mask_ofl_ipi &= ~mask;
- 			raw_spin_unlock_irqrestore(&rnp->lock, flags);
+ 			raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 		}
 		/* Report quiescent states for those that went offline. */	
 		mask_ofl_test |= mask_ofl_ipi;	
