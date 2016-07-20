@@ -354,6 +354,7 @@ struct qpnp_hap {
 	struct qpnp_hap_lra_ares_cfg	ares_cfg;
 	struct mutex			lock;
 	struct mutex			wf_lock;
+	struct mutex 			set_lock;
 	spinlock_t			bus_lock;
 	spinlock_t			td_lock;
 	struct work_struct		td_work;
@@ -2078,6 +2079,8 @@ static int qpnp_hap_set(struct qpnp_hap *hap, bool on)
 	int rc = 0;
 	unsigned long timeout_ns = POLL_TIME_AUTO_RES_ERR_NS;
 
+	mutex_lock(&hap->set_lock);
+
 	if (hap->play_mode == QPNP_HAP_PWM) {
 		if (on) {
 			rc = pwm_enable(hap->pwm_info.pwm_dev);
@@ -2094,16 +2097,20 @@ static int qpnp_hap_set(struct qpnp_hap *hap, bool on)
 				return rc;
 
 			rc = qpnp_hap_mod_enable(hap, on);
-			if (rc < 0)
+			if (rc < 0) {
+				mutex_unlock(&hap->set_lock);
 				return rc;
+			}
 
 			rc = qpnp_hap_play(hap, on);
 			if (rc < 0)
 				return rc;
 
 			rc = qpnp_hap_auto_res_enable(hap, 1);
-			if (rc < 0)
+			if (rc < 0) {
+				mutex_unlock(&hap->set_lock);
 				return rc;
+			}
 
 			if (is_sw_lra_auto_resonance_control(hap)) {
 				/*
@@ -2118,8 +2125,10 @@ static int qpnp_hap_set(struct qpnp_hap *hap, bool on)
 			}
 		} else {
 			rc = qpnp_hap_play(hap, on);
-			if (rc < 0)
+			if (rc < 0) {
+				mutex_unlock(&hap->set_lock);
 				return rc;
+			}
 
 			if (is_sw_lra_auto_resonance_control(hap) &&
 				(hap->status_flags & AUTO_RESONANCE_ENABLED))
@@ -2134,6 +2143,7 @@ static int qpnp_hap_set(struct qpnp_hap *hap, bool on)
 		}
 	}
 
+	mutex_unlock(&hap->set_lock);
 	return rc;
 }
 
@@ -2314,7 +2324,10 @@ static void qpnp_timed_enable_worker(struct work_struct *work)
 		ktime_set(time_ms / 1000, (time_ms % 1000) * 1000000),
 		HRTIMER_MODE_REL);
 	mutex_unlock(&hap->lock);
-	schedule_work(&hap->work);
+	if (hap->play_mode == QPNP_HAP_DIRECT)
+		qpnp_hap_set(hap, hap->state);
+	else
+		schedule_work(&hap->work);
 }
 
 /* enable interface from timed output class */
@@ -2322,7 +2335,7 @@ static void qpnp_hap_td_enable(struct timed_output_dev *dev, int time_ms)
 {
 	struct qpnp_hap *hap = container_of(dev, struct qpnp_hap,
 					 timed_dev);
-
+        flush_work(&hap->work);
 	spin_lock(&hap->td_lock);
 	hap->td_time_ms = time_ms;
 	spin_unlock(&hap->td_lock);
@@ -3069,6 +3082,7 @@ static int qpnp_haptic_probe(struct platform_device *pdev)
 
 	mutex_init(&hap->lock);
 	mutex_init(&hap->wf_lock);
+	mutex_init(&hap->set_lock);
 	spin_lock_init(&hap->td_lock);
 	INIT_WORK(&hap->work, qpnp_hap_worker);
 	INIT_DELAYED_WORK(&hap->sc_work, qpnp_handle_sc_irq);
