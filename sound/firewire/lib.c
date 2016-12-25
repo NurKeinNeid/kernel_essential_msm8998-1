@@ -82,7 +82,7 @@ static void async_midi_port_callback(struct fw_card *card, int rcode,
 		snd_rawmidi_transmit_ack(substream, port->consume_bytes);
 	else if (!rcode_is_permanent_error(rcode))
 		/* To start next transaction immediately for recovery. */
-		port->next_ktime = ktime_set(0, 0);
+		port->next_ktime = 0;
 	else
 		/* Don't continue processing. */
 		port->error = true;
@@ -124,7 +124,7 @@ static void midi_port_work(struct work_struct *work)
 	if (port->consume_bytes <= 0) {
 		/* Do it in next chance, immediately. */
 		if (port->consume_bytes == 0) {
-			port->next_ktime = ktime_set(0, 0);
+			port->next_ktime = 0;
 			schedule_work(&port->work);
 		} else {
 			/* Fatal error. */
@@ -187,7 +187,7 @@ int snd_fw_async_midi_port_init(struct snd_fw_async_midi_port *port,
 	port->addr = addr;
 	port->fill = fill;
 	port->idling = true;
-	port->next_ktime = ktime_set(0, 0);
+	port->next_ktime = 0;
 	port->error = false;
 
 	INIT_WORK(&port->work, midi_port_work);
