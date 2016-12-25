@@ -4021,7 +4021,7 @@ schedule_resp(struct scsi_cmnd *cmnd, struct sdebug_dev_info *devip,
 		sqcp->cmnd_timerp->expires = get_jiffies_64() + delta_jiff;
 		add_timer(sqcp->cmnd_timerp);
 	} else if (scsi_debug_ndelay > 0) {
-		ktime_t kt = ktime_set(0, scsi_debug_ndelay);
+		ktime_t kt = scsi_debug_ndelay;
 		struct sdebug_hrtimer *sd_hp = sqcp->sd_hrtp;
 
 		if (NULL == sd_hp) {

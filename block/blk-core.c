@@ -2403,14 +2403,14 @@ static const struct file_operations flush_hist_ops = {
 static void clear_perf_stats_helper(void)
 {
 	spin_lock(&blk_perf.lock);
-	blk_perf.max_write_time = ktime_set(0, 0);
-	blk_perf.max_read_time = ktime_set(0, 0);
-	blk_perf.max_flush_time = ktime_set(0, 0);
-	blk_perf.min_write_time = ktime_set(KTIME_MAX, 0);
-	blk_perf.min_read_time = ktime_set(KTIME_MAX, 0);
-	blk_perf.min_flush_time = ktime_set(KTIME_MAX, 0);
-	blk_perf.total_write_time = ktime_set(0, 0);
-	blk_perf.total_read_time = ktime_set(0, 0);
+	blk_perf.max_write_time = 0;
+	blk_perf.max_read_time = 0;
+	blk_perf.max_flush_time = 0;
+	blk_perf.min_write_time = KTIME_MAX;
+	blk_perf.min_read_time = KTIME_MAX;
+	blk_perf.min_flush_time = KTIME_MAX;
+	blk_perf.total_write_time = 0;
+	blk_perf.total_read_time = 0;
 	blk_perf.total_read_size = 0;
 	blk_perf.total_write_size = 0;
 	blk_perf.is_enabled = 0;
