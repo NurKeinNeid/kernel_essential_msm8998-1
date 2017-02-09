@@ -74,10 +74,21 @@ ifeq ($(cc-name),clang)
 # TODO: revert when this is fixed in LLVM.
 KBUILD_CFLAGS	+= -mno-implicit-float
 else
-KBUILD_CFLAGS	+= -mgeneral-regs-only
+KBUILD_CFLAGS   += -mgeneral-regs-only
 endif
+
+ARM_ARCH_OPT := -mtune=cortex-a57.cortex-a53
+GEN_OPT_FLAGS := $(call cc-option,$(ARM_ARCH_OPT),-march=armv8-a) \
+ -g0 \
+ -DNDEBUG \
+ -fomit-frame-pointer \
+ -fmodulo-sched \
+ -fmodulo-sched-allow-regmoves \
+ -fivopts
+
 KBUILD_CFLAGS	+= $(lseinstr) $(vdso32)
 KBUILD_CFLAGS	+= -fno-pic
+KBUILD_CFLAGS	+= $(GEN_OPT_FLAGS)
 KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
 KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
 KBUILD_AFLAGS	+= $(lseinstr) $(vdso32)
