@@ -32,6 +32,8 @@
 #endif
 #include <linux/workqueue.h>
 
+#include "posix-timers.h"
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/alarmtimer.h>
 
