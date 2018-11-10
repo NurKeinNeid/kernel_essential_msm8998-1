@@ -121,6 +121,7 @@ config ARM64
 	select OF_EARLY_FLATTREE
 	select OF_RESERVED_MEM
 	select PCI_ECAM if ACPI
+	select PERF_USE_VMALLOC
 	select POWER_RESET
 	select POWER_SUPPLY
 	select RTC_LIB
