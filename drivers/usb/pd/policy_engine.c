@@ -3689,9 +3689,6 @@ static ssize_t get_battery_cap_show(struct device *dev,
 	int i, len = 0;
 	struct usbpd *pd = dev_get_drvdata(dev);
 
-	if (pd->get_battery_cap_db == -EINVAL)
-		return -EINVAL;
-
 	for (i = 0; i < PD_BATTERY_CAP_DB_LEN; i++)
 		len += snprintf(buf + len, PAGE_SIZE - len, "%d\n",
 			pd->battery_cap_db[i]);
@@ -3721,9 +3718,6 @@ static ssize_t get_battery_status_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct usbpd *pd = dev_get_drvdata(dev);
-
-	if (pd->get_battery_status_db == -EINVAL)
-		return -EINVAL;
 
 	return snprintf(buf, PAGE_SIZE, "%d\n", pd->battery_sts_dobj);
 }

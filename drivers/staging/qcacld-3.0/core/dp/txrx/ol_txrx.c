@@ -425,10 +425,8 @@ ol_txrx_peer_find_by_local_id(struct ol_txrx_pdev_t *pdev,
 {
 	struct ol_txrx_peer_t *peer;
 
-	if ((local_peer_id == OL_TXRX_INVALID_LOCAL_PEER_ID) ||
-	    (local_peer_id >= OL_TXRX_NUM_LOCAL_PEER_IDS)) {
+	if (local_peer_id >= OL_TXRX_NUM_LOCAL_PEER_IDS)
 		return NULL;
-	}
 
 	qdf_spin_lock_bh(&pdev->local_peer_ids.lock);
 	peer = pdev->local_peer_ids.map[local_peer_id];

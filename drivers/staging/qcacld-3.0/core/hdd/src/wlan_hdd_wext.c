@@ -12005,9 +12005,7 @@ static int __iw_set_pno(struct net_device *dev,
 		   &offset) > 0)
 		ptr += offset;
 	if (request.fast_scan_max_cycles <
-			CFG_PNO_SCAN_TIMER_REPEAT_VALUE_MIN ||
-			request.fast_scan_max_cycles >
-			CFG_PNO_SCAN_TIMER_REPEAT_VALUE_MAX) {
+			CFG_PNO_SCAN_TIMER_REPEAT_VALUE_MIN) {
 		hdd_err("invalid fast scan max cycles %hhu",
 			request.fast_scan_max_cycles);
 		qdf_mem_free(data);
