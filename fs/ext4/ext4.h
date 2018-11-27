@@ -589,8 +589,8 @@ enum {
 #define EXT4_ENCRYPTION_MODE_AES_256_GCM	2
 #define EXT4_ENCRYPTION_MODE_AES_256_CBC	3
 #define EXT4_ENCRYPTION_MODE_AES_256_CTS	4
+#define EXT4_ENCRYPTION_MODE_PRIVATE		127
 #define EXT4_ENCRYPTION_MODE_AES_256_HEH	126
-#define EXT4_ENCRYPTION_MODE_PRIVATE            127
 
 #include "ext4_crypto.h"
 
@@ -3068,6 +3068,9 @@ extern struct buffer_head *ext4_get_first_inline_block(struct inode *inode,
 extern int ext4_inline_data_fiemap(struct inode *inode,
 				   struct fiemap_extent_info *fieinfo,
 				   int *has_inline, __u64 start, __u64 len);
+extern int ext4_try_to_evict_inline_data(handle_t *handle,
+					 struct inode *inode,
+					 int needed);
 extern void ext4_inline_data_truncate(struct inode *inode, int *has_inline);
 
 extern int ext4_convert_inline_data(struct inode *inode);
