@@ -315,14 +315,15 @@ void tune_lmk_zone_param(struct zonelist *zonelist, int classzone_idx,
 void adjust_gfp_mask(gfp_t *gfp_mask)
 {
 	struct zone *preferred_zone;
+	struct zoneref *zref;
 	struct zonelist *zonelist;
 	enum zone_type high_zoneidx;
 
 	if (current_is_kswapd()) {
 		zonelist = node_zonelist(0, *gfp_mask);
 		high_zoneidx = gfp_zone(*gfp_mask);
-		first_zones_zonelist(zonelist, high_zoneidx, NULL,
-				     &preferred_zone);
+		zref = first_zones_zonelist(zonelist, high_zoneidx, NULL);
+		preferred_zone = zref->zone;
 
 		if (high_zoneidx == ZONE_NORMAL) {
 			if (zone_watermark_ok_safe(
@@ -344,6 +345,7 @@ void tune_lmk_param(int *other_free, int *other_file, struct shrink_control *sc)
 {
 	gfp_t gfp_mask;
 	struct zone *preferred_zone;
+	struct zoneref *zref;
 	struct zonelist *zonelist;
 	enum zone_type high_zoneidx, classzone_idx;
 	unsigned long balance_gap;
@@ -354,7 +356,8 @@ void tune_lmk_param(int *other_free, int *other_file, struct shrink_control *sc)
 
 	zonelist = node_zonelist(0, gfp_mask);
 	high_zoneidx = gfp_zone(gfp_mask);
-	first_zones_zonelist(zonelist, high_zoneidx, NULL, &preferred_zone);
+	zref = first_zones_zonelist(zonelist, high_zoneidx, NULL);
+	preferred_zone = zref->zone;
 	classzone_idx = zone_idx(preferred_zone);
 	use_cma_pages = can_use_cma_pages(gfp_mask);
 
