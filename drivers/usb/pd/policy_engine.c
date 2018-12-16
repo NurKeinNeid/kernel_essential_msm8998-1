@@ -3991,6 +3991,7 @@ struct usbpd *usbpd_create(struct device *parent)
 	/* force read initial power_supply values */
 	psy_changed(&pd->psy_nb, PSY_EVENT_PROP_CHANGED, pd->usb_psy);
 
+	kfree(pd);
 	return pd;
 
 del_inst:

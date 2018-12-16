@@ -733,6 +733,7 @@ int add_deserialization_func(void *ctxt, int type,
 	list_add_tail(&df_info->list, &ilctxt->dfunc_info_list);
 	spin_unlock(&ilctxt->context_lock_lhb1);
 	read_unlock_irqrestore(&context_list_lock_lha1, flags);
+	kfree(df_info);
 	return 0;
 }
 EXPORT_SYMBOL(add_deserialization_func);
@@ -820,6 +821,7 @@ void *ipc_log_context_create(int max_num_pages,
 	write_lock_irqsave(&context_list_lock_lha1, flags);
 	list_add_tail(&ctxt->list, &ipc_log_context_list);
 	write_unlock_irqrestore(&context_list_lock_lha1, flags);
+	kfree(pg);
 	return (void *)ctxt;
 
 release_ipc_log_context:

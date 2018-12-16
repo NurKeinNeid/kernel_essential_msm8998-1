@@ -1508,6 +1508,7 @@ out_create_rmt_port1:
 out_create_rmt_port2:
 	up_write(&rt_entry->lock_lha4);
 	kref_put(&rt_entry->ref, ipc_router_release_rtentry);
+	kfree(rport_ptr);
 	return rport_ptr;
 }
 

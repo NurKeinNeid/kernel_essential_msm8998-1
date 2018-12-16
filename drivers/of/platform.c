@@ -147,6 +147,7 @@ struct platform_device *of_device_alloc(struct device_node *np,
 	else
 		of_device_make_bus_id(&dev->dev);
 
+	kfree(res);
 	return dev;
 }
 EXPORT_SYMBOL(of_device_alloc);
