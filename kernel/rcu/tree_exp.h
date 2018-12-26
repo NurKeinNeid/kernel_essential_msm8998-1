@@ -219,7 +219,7 @@ static bool sync_exp_work_done(struct rcu_state *rsp, atomic_long_t *stat,
  * pointer to the root rcu_node structure, or NULL if some other	
  * task did the expedited grace period for us.	
  */	
-static bool *exp_funnel_lock(struct rcu_state *rsp, unsigned long s)	
+static bool exp_funnel_lock(struct rcu_state *rsp, unsigned long s)	
 {	
 	struct rcu_data *rdp = per_cpu_ptr(rsp->rda, raw_smp_processor_id());	
  	struct rcu_node *rnp = rdp->mynode;
